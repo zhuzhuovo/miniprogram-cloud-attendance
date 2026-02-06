@@ -1,0 +1,136 @@
+/* 个人设置页样式 */
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.header {
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 用户信息区域 */
+.user-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30rpx;
+}
+
+.user-info {
+  /* 解决微信授权：用户信息区域居中显示 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 40rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  width: 90%;
+}
+
+.avatar {
+  /* 解决微信授权：微信头像（圆形） */
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-bottom: 20rpx;
+  background-color: #f0f0f0;
+}
+
+.nickname {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.setting-list {
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item:active {
+  background-color: #f9f9f9;
+}
+
+/* 解决微信授权：添加边框样式，使按钮更醒目 */
+.setting-item.bordered {
+  border: 1rpx solid #e0e0e0;
+  border-radius: 8rpx;
+  margin: 10rpx 15rpx;
+  box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.05);
+}
+
+.setting-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.setting-arrow {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 登录部分 */
+.login-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 40rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  width: 90%;
+}
+
+.login-btn {
+  width: 200rpx;
+  height: 70rpx;
+  background-color: #4CAF50;
+  color: #fff;
+  border-radius: 35rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  margin-bottom: 20rpx;
+}
+
+/* 微信授权登录按钮样式 */
+.wechat-login-btn {
+  width: 80%; /* 宽度80% */
+  height: 80rpx;
+  background-color: #07C160; /* 绿色背景 */
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+}
+
+.login-hint {
+  font-size: 22rpx;
+  color: #999;
+  text-align: center;
+}

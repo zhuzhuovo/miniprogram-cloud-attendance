@@ -1,0 +1,36 @@
+<!-- 打卡历史页 -->
+<view class="container">
+  <view class="header">
+    <text class="title">打卡历史</text>
+    <view class="filter">
+      <picker bindchange="bindDateChange" range="{{dateRange}}" value="{{dateIndex}}">
+        <view class="picker">
+          {{dateRange[dateIndex]}}
+        </view>
+      </picker>
+    </view>
+  </view>
+  
+  <!-- 打卡记录列表 -->
+  <view class="record-list" wx:if="{{records.length > 0}}">
+    <view class="record-item" wx:for="{{records}}" wx:key="_id">
+      <view class="record-header">
+        <text class="record-time">{{formatTime(item.checkInTime)}}</text>
+        <text class="record-type" wx:if="{{item.type === 'on'}}">上班打卡</text>
+        <text class="record-type off" wx:else>下班打卡</text>
+      </view>
+      <view class="record-body">
+        <text class="record-status" wx:if="{{item.status === 'normal'}}">正常</text>
+        <text class="record-status late" wx:elif="{{item.status === 'late'}}">迟到</text>
+        <text class="record-status early" wx:else>早退</text>
+        <text class="record-location">位置: {{item.location.lat}}, {{item.location.lng}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空状态 -->
+  <view class="empty" wx:else>
+    <text class="empty-text">暂无打卡记录</text>
+    <text class="empty-hint">请先在首页完成打卡</text>
+  </view>
+</view>

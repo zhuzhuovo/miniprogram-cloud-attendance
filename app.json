@@ -1,0 +1,45 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/history/history",
+    "pages/setting/setting"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "员工打卡",
+    "navigationBarBackgroundColor": "#4CAF50"
+  },
+  "tabBar": {
+    "color": "#666",
+    "selectedColor": "#4CAF50",
+    "backgroundColor": "#fff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "打卡"
+      },
+      {
+        "pagePath": "pages/history/history",
+        "text": "历史"
+      },
+      {
+        "pagePath": "pages/setting/setting",
+        "text": "设置"
+      }
+    ]
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于获取您的位置信息，以便进行打卡操作"
+    },
+    "scope.userLocationBackground": {
+      "desc": "用于后台获取您的位置信息，以便实时更新打卡状态"
+    }
+  },
+  "requiredBackgroundModes": ["location"]
+}

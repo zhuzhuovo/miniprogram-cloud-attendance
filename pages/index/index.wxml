@@ -1,0 +1,78 @@
+<!-- 打卡首页 -->
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="container">
+    <!-- 头部信息 -->
+    <view class="header">
+      <text class="title">员工打卡</text>
+      <text class="current-time">{{currentTime}}</text>
+    </view>
+    
+    <!-- 登录提示 -->
+    <view class="login-tip" wx:if="{{!hasUserInfo}}">
+      <button class="login-btn" bindtap="onLoginTap">点击登录</button>
+      <text class="login-hint">登录后才能进行打卡操作</text>
+    </view>
+
+    <!-- 登录弹窗：头像昵称填写（替代已不再返回真实信息的 wx.getUserProfile） -->
+    <view class="login-mask" wx:if="{{showLoginModal}}" catchtap="onCloseLoginModal"></view>
+    <view class="login-modal" wx:if="{{showLoginModal}}">
+      <view class="login-modal-title">完善打卡信息</view>
+      <view class="login-modal-desc">请选择头像并填写昵称，用于打卡记录</view>
+      <form class="login-form" bindsubmit="onLoginFormSubmit" report-submit="false">
+        <view class="login-form-avatar-wrap">
+          <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+            <image class="avatar-img" src="{{tempAvatarPath || defaultAvatarUrl}}" mode="aspectFill"></image>
+          </button>
+          <text class="avatar-tip">点击选择头像</text>
+        </view>
+        <view class="login-form-nickname">
+          <input class="nickname-input" type="nickname" name="nickname" placeholder="请输入昵称" placeholder-class="nickname-placeholder" />
+        </view>
+        <view class="login-form-btns">
+          <button class="login-modal-btn cancel" type="button" bindtap="onCloseLoginModal">取消</button>
+          <button class="login-modal-btn confirm" form-type="submit">确定</button>
+        </view>
+      </form>
+    </view>
+    
+    <!-- 打卡状态 -->
+    <view class="status-section">
+      <text class="status-title">今日打卡状态</text>
+      <text class="status-content">{{checkInStatus}}</text>
+    </view>
+    
+    <!-- 地图组件 -->
+    <view class="map-section" wx:if="{{latitude && longitude}}">
+      <!-- 地图尺寸调整：高度400rpx，宽度100% -->
+      <map 
+        class="map" 
+        latitude="{{latitude}}" 
+        longitude="{{longitude}}" 
+        scale="18" 
+        markers="{{markers}}"
+        show-location="true"
+      ></map>
+    </view>
+    
+    <!-- 位置信息 -->
+    <view class="location-section">
+      <text class="location-title">当前位置</text>
+      <text class="location-content">{{locationInfo || '获取位置中...'}}</text>
+      <text class="location-hint" wx:if="{{!isInCompanyRange}}">不在打卡范围内</text>
+    </view>
+    
+    <!-- 打卡按钮 -->
+    <view class="checkin-section">
+      <!-- 布局优化：按钮宽度80%左右，样式更醒目 -->
+      <button class="checkin-btn" bindtap="checkIn" data-type="on" disabled="{{!canCheckIn || hasCheckedInOn}}" wx:if="{{!hasCheckedInOn}}">上班打卡</button>
+      <button class="checkin-btn disabled" disabled="true" wx:else>已上班打卡</button>
+      <button class="checkin-btn off" bindtap="checkIn" data-type="off" disabled="{{!canCheckIn || hasCheckedInOff}}" wx:if="{{!hasCheckedInOff}}">下班打卡</button>
+      <button class="checkin-btn off disabled" disabled="true" wx:else>已下班打卡</button>
+    </view>
+    
+    <!-- 错误提示 -->
+    <view class="error-section" wx:if="{{errorMsg}}">
+      <text class="error-msg">{{errorMsg}}</text>
+    </view>
+  </view>
+</scroll-view>
