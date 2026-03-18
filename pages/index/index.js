@@ -456,6 +456,11 @@ Page({
   // 更新位置信息
   updateLocation(res) {
     const { latitude, longitude } = res
+
+    const companyLocation = app.globalData.companyLocation || {}
+    const companyLat = typeof companyLocation.lat === 'number' ? companyLocation.lat : 31.2304
+    const companyLng = typeof companyLocation.lng === 'number' ? companyLocation.lng : 121.4737
+    const companyTitle = companyLocation.name || '公司打卡点'
     
     // 更新地图标记点
     const markers = [
@@ -470,9 +475,9 @@ Page({
       },
       {
         id: 1,
-        latitude: 31.2304,
-        longitude: 121.4737,
-        title: '公司打卡点',
+        latitude: companyLat,
+        longitude: companyLng,
+        title: companyTitle,
         iconPath: '/resources/company.png',
         width: 30,
         height: 30
@@ -491,9 +496,19 @@ Page({
   // 检查是否在公司范围内
   checkLocationRange(lat, lng) {
     const companyLocation = app.globalData.companyLocation
+    if (!companyLocation || typeof companyLocation.lat !== 'number' || typeof companyLocation.lng !== 'number') {
+      this.setData({
+        isInCompanyRange: false,
+        canCheckIn: false,
+        errorMsg: '未配置公司位置'
+      })
+      return
+    }
+
+    const radius = companyLocation.radius || 500
     const distance = this.calculateDistance(lat, lng, companyLocation.lat, companyLocation.lng)
     
-    if (distance <= companyLocation.radius) {
+    if (distance <= radius) {
       this.setData({
         isInCompanyRange: true,
         canCheckIn: true,
@@ -596,7 +611,8 @@ Page({
             location: {
               lat: latitude,
               lng: longitude
-            }
+            },
+            companyLocation: app.globalData.companyLocation || null
           }
         })
         .then(res => {

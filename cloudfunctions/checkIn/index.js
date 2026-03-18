@@ -47,11 +47,24 @@ exports.main = async (event, context) => {
     const openid = wxContext.OPENID;
     
     // 公司位置配置（实际项目中应该从数据库或配置文件读取）
-    const companyLocation = {
+    const defaultCompanyLocation = {
       lat: 31.2304,
       lng: 121.4737,
       radius: 500
     };
+
+    const inputLocation = event.companyLocation || {}
+    const hasValidInput =
+      typeof inputLocation.lat === 'number' &&
+      typeof inputLocation.lng === 'number'
+
+    const companyLocation = hasValidInput
+      ? {
+          lat: inputLocation.lat,
+          lng: inputLocation.lng,
+          radius: typeof inputLocation.radius === 'number' ? inputLocation.radius : defaultCompanyLocation.radius
+        }
+      : defaultCompanyLocation
     
     // 计算距离
     const distance = calculateDistance(lat, lng, companyLocation.lat, companyLocation.lng);

@@ -15,6 +15,9 @@ App({
 
     // 自动登录逻辑
     this.autoLogin()
+
+    // 恢复已保存的公司位置
+    this.restoreCompanyLocation()
   },
   
   // 自动登录函数
@@ -48,6 +51,16 @@ App({
         console.log('wx.login失败：', err)
       }
     })
+  },
+
+  // 从本地缓存恢复公司位置配置
+  restoreCompanyLocation() {
+    const storedLocation = wx.getStorageSync('companyLocation')
+    if (storedLocation && storedLocation.lat && storedLocation.lng) {
+      // 保留已有半径等配置，优先使用存储值
+      this.globalData.companyLocation = Object.assign({}, this.globalData.companyLocation, storedLocation)
+      console.log('已加载自定义公司位置', this.globalData.companyLocation)
+    }
   },
   
   globalData: {

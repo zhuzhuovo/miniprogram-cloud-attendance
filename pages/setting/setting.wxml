@@ -24,6 +24,12 @@
   
   <!-- 设置项 -->
   <view class="setting-list">
+    <!-- 设置公司位置 -->
+    <view class="setting-item" bindtap="openCompanyLocationMenu">
+      <text class="setting-label">设置公司位置</text>
+      <text class="setting-arrow">→</text>
+    </view>
+
     <!-- 修改打卡范围（仅管理员可见） -->
     <view class="setting-item" wx:if="{{isAdmin}}" bindtap="modifyCheckInRange">
       <text class="setting-label">修改打卡范围</text>

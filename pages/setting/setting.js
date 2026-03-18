@@ -202,6 +202,81 @@ Page({
     })
   },
 
+  // 修改公司位置入口
+  openCompanyLocationMenu() {
+    wx.showActionSheet({
+      itemList: ['从腾讯地图选择', '手动输入经纬度'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.chooseCompanyLocationByMap()
+        } else if (res.tapIndex === 1) {
+          this.promptManualLocationInput()
+        }
+      }
+    })
+  },
+
+  // 调用腾讯地图选择位置
+  chooseCompanyLocationByMap() {
+    wx.chooseLocation({
+      success: (res) => {
+        const { latitude, longitude, name, address } = res
+        this.saveCompanyLocation(latitude, longitude, name, address)
+      },
+      fail: (err) => {
+        console.log('选择位置失败', err)
+      }
+    })
+  },
+
+  // 手动输入经纬度
+  promptManualLocationInput() {
+    wx.showModal({
+      title: '输入经纬度',
+      content: '请输入纬度,经度，例如 31.2304,121.4737',
+      editable: true,
+      placeholderText: '纬度,经度',
+      success: (res) => {
+        if (!res.confirm || !res.content) return
+        const parts = res.content.split(/[,，]/).map(item => item.trim()).filter(Boolean)
+        if (parts.length < 2) {
+          wx.showToast({ title: '格式应为 纬度,经度', icon: 'none' })
+          return
+        }
+        this.saveCompanyLocation(parts[0], parts[1], '手动输入', '')
+      }
+    })
+  },
+
+  // 保存公司位置到全局与本地缓存
+  saveCompanyLocation(lat, lng, name, address) {
+    const parsedLat = Number(lat)
+    const parsedLng = Number(lng)
+    if (!isFinite(parsedLat) || !isFinite(parsedLng)) {
+      wx.showToast({ title: '经纬度必须是数字', icon: 'none' })
+      return
+    }
+    if (Math.abs(parsedLat) > 90 || Math.abs(parsedLng) > 180) {
+      wx.showToast({ title: '经纬度范围不正确', icon: 'none' })
+      return
+    }
+
+    const app = getApp()
+    const radius = (app.globalData.companyLocation && app.globalData.companyLocation.radius) || 500
+    const location = {
+      lat: parsedLat,
+      lng: parsedLng,
+      radius: radius,
+      name: name || '自定义位置',
+      address: address || ''
+    }
+
+    app.globalData.companyLocation = location
+    wx.setStorageSync('companyLocation', location)
+
+    wx.showToast({ title: '公司位置已更新', icon: 'success' })
+  },
+
   // 修改打卡范围
   modifyCheckInRange() {
     wx.navigateTo({
