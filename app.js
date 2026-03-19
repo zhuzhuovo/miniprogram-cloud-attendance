@@ -56,9 +56,21 @@ App({
   // 从本地缓存恢复公司位置配置
   restoreCompanyLocation() {
     const storedLocation = wx.getStorageSync('companyLocation')
-    if (storedLocation && storedLocation.lat && storedLocation.lng) {
-      // 保留已有半径等配置，优先使用存储值
-      this.globalData.companyLocation = Object.assign({}, this.globalData.companyLocation, storedLocation)
+    if (!storedLocation) return
+
+    const parsedLat = Number(storedLocation.lat)
+    const parsedLng = Number(storedLocation.lng)
+    const parsedRadius = storedLocation.radius == null ? undefined : Number(storedLocation.radius)
+    const hasValidLatLng = isFinite(parsedLat) && isFinite(parsedLng) && Math.abs(parsedLat) <= 90 && Math.abs(parsedLng) <= 180
+    const hasValidRadius = parsedRadius == null || (isFinite(parsedRadius) && parsedRadius > 0)
+
+    if (hasValidLatLng && hasValidRadius) {
+      // 保留已有半径等配置，优先使用存储值；同时确保经纬度是 number
+      this.globalData.companyLocation = Object.assign({}, this.globalData.companyLocation, storedLocation, {
+        lat: parsedLat,
+        lng: parsedLng,
+        radius: parsedRadius == null ? this.globalData.companyLocation.radius : parsedRadius
+      })
       console.log('已加载自定义公司位置', this.globalData.companyLocation)
     }
   },
@@ -67,9 +79,11 @@ App({
     userInfo: null,
     // 公司打卡范围配置
     companyLocation: {
-      lat: 30.2945, // 公司纬度
-      lng: 114.2609, // 公司经度//当前位置模拟文华学院信息学部
-      radius: 999999 // 允许偏差半径（米）(bug:当前精度不满足米级打卡)
+      // 武汉市 文华学院（默认值，便于测试）
+      lat: 30.494505,
+      lng: 114.439999,
+      // 直径 20km => 半径 10km
+      radius: 10000
     },
     // 打卡时间配置
     checkInTime: {

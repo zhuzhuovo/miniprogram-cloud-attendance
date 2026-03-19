@@ -48,21 +48,29 @@ exports.main = async (event, context) => {
     
     // 公司位置配置（实际项目中应该从数据库或配置文件读取）
     const defaultCompanyLocation = {
-      lat: 31.2304,
-      lng: 121.4737,
-      radius: 500
+      // 武汉市 文华学院（默认值，便于测试）
+      lat: 30.494505,
+      lng: 114.439999,
+      // 直径 20km => 半径 10km
+      radius: 10000
     };
 
     const inputLocation = event.companyLocation || {}
+    const parsedLat = Number(inputLocation.lat)
+    const parsedLng = Number(inputLocation.lng)
+    const parsedRadius = inputLocation.radius == null ? undefined : Number(inputLocation.radius)
+
     const hasValidInput =
-      typeof inputLocation.lat === 'number' &&
-      typeof inputLocation.lng === 'number'
+      isFinite(parsedLat) &&
+      isFinite(parsedLng) &&
+      Math.abs(parsedLat) <= 90 &&
+      Math.abs(parsedLng) <= 180
 
     const companyLocation = hasValidInput
       ? {
-          lat: inputLocation.lat,
-          lng: inputLocation.lng,
-          radius: typeof inputLocation.radius === 'number' ? inputLocation.radius : defaultCompanyLocation.radius
+          lat: parsedLat,
+          lng: parsedLng,
+          radius: isFinite(parsedRadius) && parsedRadius > 0 ? parsedRadius : defaultCompanyLocation.radius
         }
       : defaultCompanyLocation
     

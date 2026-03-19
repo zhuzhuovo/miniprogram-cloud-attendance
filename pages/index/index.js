@@ -458,8 +458,8 @@ Page({
     const { latitude, longitude } = res
 
     const companyLocation = app.globalData.companyLocation || {}
-    const companyLat = typeof companyLocation.lat === 'number' ? companyLocation.lat : 31.2304
-    const companyLng = typeof companyLocation.lng === 'number' ? companyLocation.lng : 121.4737
+    const companyLat = isFinite(Number(companyLocation.lat)) ? Number(companyLocation.lat) : 30.494505
+    const companyLng = isFinite(Number(companyLocation.lng)) ? Number(companyLocation.lng) : 114.439999
     const companyTitle = companyLocation.name || '公司打卡点'
     
     // 更新地图标记点
@@ -496,7 +496,9 @@ Page({
   // 检查是否在公司范围内
   checkLocationRange(lat, lng) {
     const companyLocation = app.globalData.companyLocation
-    if (!companyLocation || typeof companyLocation.lat !== 'number' || typeof companyLocation.lng !== 'number') {
+    const companyLat = companyLocation ? Number(companyLocation.lat) : NaN
+    const companyLng = companyLocation ? Number(companyLocation.lng) : NaN
+    if (!companyLocation || !isFinite(companyLat) || !isFinite(companyLng)) {
       this.setData({
         isInCompanyRange: false,
         canCheckIn: false,
@@ -505,8 +507,8 @@ Page({
       return
     }
 
-    const radius = companyLocation.radius || 500
-    const distance = this.calculateDistance(lat, lng, companyLocation.lat, companyLocation.lng)
+    const radius = isFinite(Number(companyLocation.radius)) ? Number(companyLocation.radius) : 10000
+    const distance = this.calculateDistance(lat, lng, companyLat, companyLng)
     
     if (distance <= radius) {
       this.setData({
@@ -599,7 +601,8 @@ Page({
 
     // 获取当前位置
     wx.getLocation({
-      type: 'wgs84',
+      // 与实时位置更新 / chooseLocation 保持一致，避免坐标系混用导致距离异常
+      type: 'gcj02',
       success: (res) => {
         const { latitude, longitude } = res
         
