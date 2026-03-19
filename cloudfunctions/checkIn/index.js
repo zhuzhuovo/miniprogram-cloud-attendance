@@ -40,7 +40,11 @@ function getCheckInStatus(type, checkInTime) {
 exports.main = async (event, context) => {
   try {
     const { type, location } = event;
-    const { lat, lng } = location;
+    const userLat = Number(location && location.lat);
+    const userLng = Number(location && location.lng);
+    if (!isFinite(userLat) || !isFinite(userLng)) {
+      return { success: false, message: '定位数据无效，请重试' }
+    }
     
     // 获取用户openid
     const wxContext = cloud.getWXContext();
@@ -75,13 +79,17 @@ exports.main = async (event, context) => {
       : defaultCompanyLocation
     
     // 计算距离
-    const distance = calculateDistance(lat, lng, companyLocation.lat, companyLocation.lng);
+    const distance = calculateDistance(userLat, userLng, companyLocation.lat, companyLocation.lng);
     
     // 检查是否在打卡范围内
     if (distance > companyLocation.radius) {
       return {
         success: false,
-        message: `不在打卡范围内，距离公司${Math.round(distance)}米`
+        message: `不在打卡范围内，距离公司${Math.round(distance)}米`,
+        debug: {
+          user: { lat: userLat, lng: userLng },
+          company: { lat: companyLocation.lat, lng: companyLocation.lng, radius: companyLocation.radius }
+        }
       };
     }
     
@@ -95,8 +103,8 @@ exports.main = async (event, context) => {
         type,
         checkInTime: Date.now(),
         location: {
-          lat,
-          lng
+          lat: userLat,
+          lng: userLng
         },
         status,
         createdAt: db.serverDate()
@@ -111,8 +119,8 @@ exports.main = async (event, context) => {
         type,
         checkInTime: Date.now(),
         location: {
-          lat,
-          lng
+          lat: userLat,
+          lng: userLng
         },
         status
       }
