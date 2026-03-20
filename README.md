@@ -6,7 +6,7 @@
 
 - 打卡首页：显示当前时间、位置与打卡状态，支持上班/下班打卡，实时定位并校验是否在公司范围内，异常提示清晰。
 - 历史记录：按「今日/本周/本月」筛选并倒序展示打卡记录。
-- 设置页：展示头像昵称，支持跳转修改公司位置（本地持久化）、清除缓存、关于信息。
+- 设置页：展示头像昵称，支持修改公司位置（已加管理员验证码门槛）、清除缓存、关于信息。
 - 登录与头像昵称：基于头像昵称填写能力；登录失败时自动降级为本地模拟 openid 以便离线体验。
 
 ## 技术栈
@@ -19,7 +19,7 @@
 
 ```
 pages/            # 前端页面：index（打卡）、history、setting
-cloudfunctions/   # 云函数：checkIn（打卡）、login（openid 获取）
+cloudfunctions/   # 云函数：checkIn（打卡）、login（openid 获取）、verifyAdmin（TOTP 验证）
 app.js            # 应用入口与全局配置（云环境、公司位置、打卡时间）
 app.json          # 页面路由、TabBar、权限声明
 app.wxss          # 全局样式
@@ -33,6 +33,7 @@ app.wxss          # 全局样式
   - 下班（type=off）：18:00 前记为早退。
 - 定位与权限：在 app.json 声明前后台定位权限说明，首页进入时主动请求位置权限并提供引导。
 - 登录：wx.login 获取 code，云函数 login 优先 getWXContext，否则使用 code2Session（需配置 APP_SECRET）。失败时使用 mock openid 降级存储，保证流程可测。
+- 管理员验证码：设置页修改公司位置前需输入 6 位 TOTP（Google Authenticator 兼容，30s 步长，±1 窗口）。云函数 verifyAdmin 校验 `ADMIN_TOTP_SECRET`（Base32）。
 
 ## 部署与本地运行
 
@@ -52,10 +53,13 @@ app.wxss          # 全局样式
 
 4. 部署云函数
 
-- 在云开发面板，右键 cloudfunctions/checkIn 与 cloudfunctions/login，选择「上传并部署」→「云端安装依赖」。
+- 在云开发面板，右键 cloudfunctions/checkIn、cloudfunctions/login、cloudfunctions/verifyAdmin，选择「上传并部署」→「云端安装依赖」。
 - login 云函数需配置 APP_SECRET：
   - 优先在云函数环境变量中设置 APP_SECRET；
   - 或在 cloudfunctions/login/config.json 写入 {"APP_SECRET": "xxx"}（开发调试兜底）。
+- verifyAdmin 云函数需配置管理员密钥：
+  - 在云函数环境变量设置 `ADMIN_TOTP_SECRET=你的Base32密钥`（可用 Google Authenticator 导入）。
+  - 修改密钥后需重新部署 verifyAdmin 使其生效。
 
 5. 初始化数据库
 
@@ -65,6 +69,7 @@ app.wxss          # 全局样式
 
 6. 配置公司位置（可选）
 
+- 设置页修改公司位置前需通过 TOTP 验证；验证通过 10 分钟内可重复修改，无需再次输入。
 - 在设置页手动选择/输入经纬度，或直接在 app.js 的 globalData.companyLocation 修改默认 lat/lng/radius。
 
 7. 预览与发布

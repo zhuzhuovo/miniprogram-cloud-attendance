@@ -1,8 +1,12 @@
 // 个人设置页
+const ADMIN_VERIFY_TTL = 10 * 60 * 1000 // 管理员验证缓存 10 分钟
+
 Page({
   data: {
     userInfo: {}, // 用户信息
-    isAdmin: false // 是否为管理员
+    isAdmin: false, // 是否为管理员
+    adminVerified: false,
+    adminVerifiedAt: 0
   },
 
   onLoad() {
@@ -204,14 +208,61 @@ Page({
 
   // 修改公司位置入口
   openCompanyLocationMenu() {
-    wx.showActionSheet({
-      itemList: ['从腾讯地图选择', '手动输入经纬度'],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          this.chooseCompanyLocationByMap()
-        } else if (res.tapIndex === 1) {
-          this.promptManualLocationInput()
+    this.ensureAdminAuth(() => {
+      wx.showActionSheet({
+        itemList: ['从腾讯地图选择', '手动输入经纬度'],
+        success: (res) => {
+          if (res.tapIndex === 0) {
+            this.chooseCompanyLocationByMap()
+          } else if (res.tapIndex === 1) {
+            this.promptManualLocationInput()
+          }
         }
+      })
+    })
+  },
+
+  // 管理员验证码校验（支持 Google Authenticator TOTP，6 位码）
+  ensureAdminAuth(next) {
+    const now = Date.now()
+    if (this.data.adminVerified && now - this.data.adminVerifiedAt < ADMIN_VERIFY_TTL) {
+      next && next()
+      return
+    }
+
+    wx.showModal({
+      title: '管理员验证',
+      editable: true,
+      placeholderText: '请输入 6 位验证码',
+      confirmText: '验证',
+      success: (res) => {
+        if (!res.confirm) return
+        const code = String(res.content || '').trim()
+        if (!/^\d{6}$/.test(code)) {
+          wx.showToast({ title: '请输入 6 位数字验证码', icon: 'none' })
+          return
+        }
+
+        wx.showLoading({ title: '验证中...', mask: true })
+        wx.cloud.callFunction({
+          name: 'verifyAdmin',
+          data: { code }
+        }).then(cfRes => {
+          wx.hideLoading()
+          const ok = cfRes && cfRes.result && cfRes.result.success
+          if (ok) {
+            this.setData({ adminVerified: true, adminVerifiedAt: Date.now() })
+            wx.showToast({ title: '验证通过', icon: 'success' })
+            next && next()
+          } else {
+            const msg = (cfRes && cfRes.result && cfRes.result.message) || '验证失败'
+            wx.showToast({ title: msg, icon: 'none' })
+          }
+        }).catch(err => {
+          wx.hideLoading()
+          console.log('管理员验证失败', err)
+          wx.showToast({ title: '验证失败，请重试', icon: 'none' })
+        })
       }
     })
   },
